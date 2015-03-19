@@ -634,27 +634,48 @@ namespace Database_complex
 
         private void btInventoryAdd_Click(object sender, EventArgs e)
         {
-            InventoryType inv = InventoryType.InsertAndNew(tbInventoryTitle.Text, tbInventoryDesc.Text);
-            if (null != inv)
+            try
             {
-                root.Inventorys.Add(inv);
-                initInventoryPage();
+                InventoryType inv = InventoryType.InsertAndNew(tbInventoryTitle.Text, tbInventoryDesc.Text);
+                if (null != inv)
+                {
+                    root.Inventorys.Add(inv);
+                    initInventoryPage();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void btInventorySave_Click(object sender, EventArgs e)
         {
-            InventoryType inv = (InventoryType)listBoxInventory.SelectedItem;
-            inv.Update(tbInventoryTitle.Text, tbInventoryDesc.Text);
-            initInventoryPage();
+            try
+            {
+                InventoryType inv = (InventoryType)listBoxInventory.SelectedItem;
+                inv.Update(tbInventoryTitle.Text, tbInventoryDesc.Text);
+                initInventoryPage();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void btInventoryDel_Click(object sender, EventArgs e)
         {
-           InventoryType inv = (InventoryType)listBoxInventory.SelectedItem;
-           if (inv.Delete())
-               root.Inventorys.Remove(inv);
-           initInventoryPage();
+            try
+            {
+                InventoryType inv = (InventoryType)listBoxInventory.SelectedItem;
+                inv.Delete();
+                root.Inventorys.Remove(inv);
+                initInventoryPage();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void gbInventoryClass_EnabledChanged(object sender, EventArgs e)

@@ -102,7 +102,8 @@ namespace Database_complex
                     while (read.Read())
                     {
                         int inv_id = read.GetInt32(0);
-                        lst.Add(new Classroom_Inventory(classroom, InventoryType.getById(invents, inv_id)));
+                        lst.Add(new Classroom_Inventory(classroom, 
+                            invents.First<InventoryType>(inv=>inv.id == inv_id)));
                     }
                 }
             }

@@ -8,48 +8,24 @@ using System.Windows.Forms;
 
 namespace Database_complex
 {
-    class InventoryType
+    public class InventoryType
     {
-        public static DbCommand cmd;
-
-        private static string UpdateStr =
-            @"UPDATE InventoryType SET title='{0}', description='{1}' WHERE id = {2}";
-        private static string DeleteStr =
-            @"DELETE FROM InventoryType WHERE id = {0}";
-        private static string InsertStr =
-            @"INSERT INTO InventoryType (title,description) VALUES ('{0}','{1}')";
-        private static string GetId =
-            @"SELECT id FROM InventoryType WHERE title='{0}'";
+        public static IQueryExecuter queryEx;
 
         public int id { get; private set; }
         public string title { get; private set; }
         public string descrition { get; private set; }
 
         //Вставляет новую запись в БД и возвращает её объект
-        //return null - ошибка
+        //При ошибке генерирует исключение
         public static InventoryType InsertAndNew(string title, string descrition)
         {
-            bool result = true;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = String.Format(InsertStr, title, descrition);
-            int id = 0;
-            try
-            {
-                cmd.Connection.Open();
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = String.Format(GetId,title);
-                id = (int)cmd.ExecuteScalar();
-            }
-            catch (DbException ex)
-            {
-                MessageBox.Show(ex.Message);
-                result = false;
-            }
-            finally
-            {
-                cmd.Connection.Close();
-            }
-            if (false == result) return null;
+            queryEx.ExecuteNonQuery(CommandType.Text,
+                @"INSERT INTO InventoryType (title,description) VALUES (?TITLE,?DESCRIPTION)",
+                new Dictionary<string, object>() { { "?TITLE", title }, { "?DESCRIPTION", descrition } });
+            int id = (int)queryEx.ExecuteScalar(CommandType.Text,
+                @"SELECT id FROM InventoryType WHERE title=?TITLE",
+                new Dictionary<string, object>() { { "?TITLE", title }});
             return new InventoryType(id, title, descrition);
         }
 
@@ -60,53 +36,21 @@ namespace Database_complex
             this.descrition = descrition;
         }
 
-        public bool Update(string title, string descrition)
+        public void Update(string title, string descrition)
         {
-            bool result = true;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = String.Format(UpdateStr, title, descrition, id);
-            try
-            {
-                cmd.Connection.Open();
-                cmd.ExecuteNonQuery();
-            }
-            catch (DbException ex)
-            {
-                MessageBox.Show(ex.Message);
-                result = false;
-            }
-            finally
-            {
-                cmd.Connection.Close();
-            }
-            if (true == result)
-            {
-                this.title = title;
-                this.descrition = descrition;
-            }
-            return result;
+            queryEx.ExecuteNonQuery(CommandType.Text,
+                @"UPDATE InventoryType SET title=?TITLE, description=?DESCRIPTION WHERE id = ?ID",
+                new Dictionary<string, object>() { { "?TITLE", title }, { "?DESCRIPTION", descrition },
+                {"?ID", id}});
+            this.title = title;
+            this.descrition = descrition;
         }
 
-        public bool Delete()
+        public void Delete()
         {
-            bool result = true;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = String.Format(DeleteStr, id);
-            try
-            {
-                cmd.Connection.Open();
-                cmd.ExecuteNonQuery();
-            }
-            catch (DbException ex)
-            {
-                MessageBox.Show(ex.Message);
-                result = false;
-            }
-            finally
-            {
-                cmd.Connection.Close();
-            }
-            return result;
+            queryEx.ExecuteNonQuery(CommandType.Text,
+                @"DELETE FROM InventoryType WHERE id = ?ID",
+                new Dictionary<string, object>() {{"?ID", id}});
         }
 
         public override string ToString()
@@ -114,11 +58,5 @@ namespace Database_complex
             return this.title;
         }
 
-        public static InventoryType getById(List<InventoryType> lst, int id)
-        {
-            foreach (InventoryType elem in lst)
-                if (elem.id == id) return elem;
-            return null;
-        }
     }
 }

@@ -30,7 +30,7 @@ namespace Database_complex
             Furniture.cmd = cmd;
             EduBuilding.cmd = cmd;
             Classroom.cmd = cmd;
-            InventoryType.cmd = cmd;
+            InventoryType.queryEx = new QueryExecuter(cmd);
             Classroom_Inventory.cmd = cmd;
             Grounds = new List<Ground>();
             Inventorys = new List<InventoryType>();
