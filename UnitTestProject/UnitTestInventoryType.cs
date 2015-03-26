@@ -27,9 +27,40 @@ namespace UnitTestProject
         {
             try
             {
-                InventoryType it = new InventoryType(1, "test", "test");
+                InventoryType it = new InventoryType(1, "title", "desc");
                 InventoryType.queryEx = null;
                 it.Update("123", "123");
+                Assert.Fail();
+            }
+            catch
+            {
+
+            }
+        }
+
+        [TestMethod]
+        public void InsertAndNew_QueryNull_Error()
+        {
+            try
+            {
+                InventoryType.queryEx = null;
+                InventoryType it = InventoryType.InsertAndNew("title", "desc");
+                Assert.Fail();
+            }
+            catch
+            {
+
+            }
+        }
+
+        [TestMethod]
+        public void Delete_QueryNull_Error()
+        {
+            try
+            {
+                InventoryType.queryEx = null;
+                InventoryType it = new InventoryType(1, "title", "desc");
+                it.Delete();
                 Assert.Fail();
             }
             catch
@@ -54,14 +85,12 @@ namespace UnitTestProject
             mock.Setup(st => st.ExecuteNonQuery(It.IsAny<CommandType>(), It.IsAny<string>(),
                 It.IsAny<Dictionary<string, object>>()));
             InventoryType.queryEx = mock.Object;
-            
-            it.Update("123", "123");
-
+            Assert.AreEqual("title", it.title);
+            it.Update("newTitle", "123");
+            Assert.AreEqual("newTitle", it.title);
             mock.Verify();
-            mock.Verify(st => st.ExecuteNonQuery(It.IsAny<CommandType>(), It.IsAny<string>(),
-                 It.IsAny<Dictionary<string, object>>()), Times.Once());
             mock.Verify(st => st.ExecuteNonQuery(CommandType.Text, It.IsAny<string>(),
-                It.IsAny<Dictionary<string, object>>()));
+                It.IsAny<Dictionary<string, object>>()), Times.Once());
         }
 
         [TestMethod]
@@ -79,10 +108,26 @@ namespace UnitTestProject
             Assert.AreEqual(123, it.id);
 
             mock.Verify();
-            mock.Verify(st => st.ExecuteNonQuery(It.IsAny<CommandType>(), It.IsAny<string>(),
-                 It.IsAny<Dictionary<string, object>>()), Times.Once());
             mock.Verify(st => st.ExecuteNonQuery(CommandType.Text, It.IsAny<string>(),
+                It.IsAny<Dictionary<string, object>>()), Times.Once());
+            mock.Verify(st => st.ExecuteScalar(CommandType.Text, It.IsAny<string>(),
+                It.IsAny<Dictionary<string, object>>()), Times.Once());
+        }
+
+        [TestMethod]
+        public void Delete_Good()
+        {
+            var mock = new Mock<IQueryExecuter>(MockBehavior.Strict);
+            mock.Setup(st => st.ExecuteNonQuery(It.IsAny<CommandType>(), It.IsAny<string>(),
                 It.IsAny<Dictionary<string, object>>()));
+            InventoryType.queryEx = mock.Object;
+
+            InventoryType it = new InventoryType(1, "title", "desc");
+            it.Delete();
+
+            mock.Verify();
+            mock.Verify(st => st.ExecuteNonQuery(CommandType.Text, It.IsAny<string>(),
+                It.IsAny<Dictionary<string, object>>()), Times.Once());
         }
     }
     
